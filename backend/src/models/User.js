@@ -61,7 +61,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ─────────────────────────────
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ createdAt: -1 });
 
 // ─── Pre-save: hash password ─────────────
