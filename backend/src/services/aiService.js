@@ -1,4 +1,5 @@
 // src/services/aiService.js
+require("dotenv").config();
 const OpenAI = require('openai');
 const logger = require('../utils/logger');
 
@@ -9,7 +10,7 @@ const client = new OpenAI({
 
 const MODEL = 'llama3-70b-8192';
 const MAX_TOKENS = 700;
-
+console.log("GROQ KEY:", process.env.GROQ_API_KEY);
 // ─── Helper: Compact Listing Formatter ───
 const formatListing = (l) => {
   const details = [

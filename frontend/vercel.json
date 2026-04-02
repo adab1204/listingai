@@ -24,6 +24,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://listingai-backend.onrender.com/"
+    "VITE_API_URL": "https://listingai-backend.onrender.com"
   }
 }
