@@ -7,10 +7,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.x",
-    "react-dom": "^18.x"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "vite": "^5.x"
+    "vite": "^8.0.3"
   }
 }
