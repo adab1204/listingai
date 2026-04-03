@@ -1,10 +1,12 @@
 // src/services/tokenService.js
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../utils/logger');
+
+const getAccessSecret = () => process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+const getRefreshSecret = () => process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
 
 const generateAccessToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
+  return jwt.sign(payload, getAccessSecret(), {
     expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     algorithm: 'HS256',
   });
@@ -13,7 +15,7 @@ const generateAccessToken = (payload) => {
 const generateRefreshToken = (payload) => {
   return jwt.sign(
     { ...payload, jti: uuidv4() }, // jti = unique token ID for rotation
-    process.env.JWT_REFRESH_SECRET,
+    getRefreshSecret(),
     {
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       algorithm: 'HS256',
@@ -22,11 +24,11 @@ const generateRefreshToken = (payload) => {
 };
 
 const verifyAccessToken = (token) => {
-  return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  return jwt.verify(token, getAccessSecret());
 };
 
 const verifyRefreshToken = (token) => {
-  return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+  return jwt.verify(token, getRefreshSecret());
 };
 
 const generateTokenPair = (user) => {

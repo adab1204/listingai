@@ -32,6 +32,7 @@ const handleJWTExpiredError = () => new AppError('Token expired. Please log in a
 const sendError = (err, req, res) => {
   // Operational errors: send message to client
   if (err.isOperational) {
+    console.error('ERROR:', err);
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
@@ -39,6 +40,7 @@ const sendError = (err, req, res) => {
   }
 
   // Programming errors: don't leak details
+  console.error('ERROR:', err);
   logger.error('Unhandled error', {
     error: err.message,
     stack: err.stack,
@@ -48,7 +50,7 @@ const sendError = (err, req, res) => {
 
   return res.status(500).json({
     success: false,
-    message: 'An unexpected error occurred. Please try again later.',
+    message: err.message || 'An unexpected error occurred. Please try again later.',
   });
 };
 

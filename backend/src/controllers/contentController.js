@@ -7,6 +7,10 @@ const logger = require('../utils/logger');
 
 // ─── POST /generate-content ───────────────
 const generate = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const { contentType, listing } = req.body;
 
   const result = await generateContent({ contentType, listing });
@@ -45,6 +49,10 @@ const generate = catchAsync(async (req, res) => {
 
 // ─── GET /content/history ─────────────────
 const getHistory = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const page = parseInt(req.query.page) || 1;
   const limit = Math.min(parseInt(req.query.limit) || 20, 50);
   const skip = (page - 1) * limit;
@@ -67,6 +75,10 @@ const getHistory = catchAsync(async (req, res) => {
 
 // ─── GET /content/:id ─────────────────────
 const getById = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const item = await GeneratedContent.findOne({
     _id: req.params.id,
     userId: req.user._id,

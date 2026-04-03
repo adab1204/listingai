@@ -97,7 +97,12 @@ const refresh = catchAsync(async (req, res) => {
     throw new AppError('Invalid or expired refresh token.', 401);
   }
 
-  const user = await User.findById(decoded.sub).select('+refreshTokens');
+  const userId = decoded?.sub || decoded?.id;
+  if (!userId) {
+    throw new AppError('Invalid or expired refresh token.', 401);
+  }
+
+  const user = await User.findById(userId).select('+refreshTokens');
   if (!user || !user.refreshTokens?.includes(token)) {
     // Possible token reuse — invalidate all tokens
     if (user) {

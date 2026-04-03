@@ -18,15 +18,19 @@ const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required. Please log in.',
+        message: 'No token',
       });
     }
 
     const decoded = verifyAccessToken(token);
+    const userId = decoded?.sub || decoded?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
 
-    const user = await User.findById(decoded.sub).select('+passwordChangedAt');
+    const user = await User.findById(userId).select('+passwordChangedAt');
     if (!user) {
-      return res.status(401).json({ success: false, message: 'User no longer exists.' });
+      return res.status(401).json({ success: false, message: 'User not found' });
     }
 
     if (user.changedPasswordAfter(decoded.iat)) {
@@ -37,13 +41,13 @@ const protect = async (req, res, next) => {
     }
 
     req.user = user;
-    next();
+    return next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ success: false, message: 'Token expired.', code: 'TOKEN_EXPIRED' });
     }
     logger.warn('Auth middleware error', { error: error.message });
-    return res.status(401).json({ success: false, message: 'Invalid token.' });
+    return res.status(401).json({ success: false, message: 'Invalid token' });
   }
 };
 

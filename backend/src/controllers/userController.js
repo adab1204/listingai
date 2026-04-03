@@ -6,12 +6,20 @@ const { catchAsync } = require('../middleware/errorHandler');
 
 // ─── GET /user/profile ────────────────────
 const getProfile = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const user = await User.findById(req.user._id);
   res.json({ success: true, data: user });
 });
 
 // ─── GET /user/subscription ───────────────
 const getSubscription = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const subscription = await Subscription.findOne({ userId: req.user._id });
 
   res.json({
@@ -28,6 +36,10 @@ const getSubscription = catchAsync(async (req, res) => {
 
 // ─── GET /user/usage ──────────────────────
 const getUsage = catchAsync(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
   const [total, byType] = await Promise.all([
     GeneratedContent.countDocuments({ userId: req.user._id }),
     GeneratedContent.aggregate([

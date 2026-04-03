@@ -5,6 +5,13 @@ const logger = require('../utils/logger');
 // ─── Check user has active subscription and credits ─
 const requireCredits = async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
     const subscription = await Subscription.getForUser(req.user._id);
 
     // Free tier: use credits on User model directly
@@ -40,10 +47,10 @@ const requireCredits = async (req, res, next) => {
     }
 
     req.subscription = subscription;
-    next();
+    return next();
   } catch (error) {
     logger.error('Subscription middleware error', { error: error.message });
-    next(error);
+    return next(error);
   }
 };
 
