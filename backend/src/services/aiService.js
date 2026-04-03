@@ -10,7 +10,7 @@ const client = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
 });
 
-const MODEL = 'llama3-70b-8192';
+const MODEL = 'llama-3.3-70b-versatile';
 const MAX_TOKENS = 700;
 // ─── Helper: Compact Listing Formatter ───
 const formatListing = (l) => {

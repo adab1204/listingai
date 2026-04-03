@@ -31,7 +31,7 @@ const generatedContentSchema = new mongoose.Schema(
     },
     model: {
       type: String,
-      default: 'llama3-70b-8192',
+      default: 'llama-3.3-70b-versatile',
     },
     generationTimeMs: Number,
   },
