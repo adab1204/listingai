@@ -165,7 +165,16 @@
 .outputEmptyText { font-size: 14px; color: rgba(26,18,9,0.4); max-width: 260px; line-height: 1.6; }
 .outputContent { display: flex; flex-direction: column; gap: 12px; }
 .outputMeta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gold); font-family: var(--font-mono); }
-.outputText { font-family: var(--font-mono); font-size: 13px; color: var(--ink); line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+.outputText {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 /* ── HISTORY TAB ─────────────────────── */
 .histLoading { display: flex; justify-content: center; padding: 80px; }
@@ -192,7 +201,18 @@
 .histDetailHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .histDetailAddress { font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: var(--ink); }
 .histDetailMeta { font-size: 12px; color: rgba(26,18,9,0.4); margin-top: 4px; font-family: var(--font-mono); }
-.histDetailOutput { font-family: var(--font-mono); font-size: 13px; color: var(--ink); line-height: 1.7; white-space: pre-wrap; word-break: break-word; border-top: 1px solid rgba(26,18,9,0.06); padding-top: 20px; }
+.histDetailOutput {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-top: 1px solid rgba(26,18,9,0.06);
+  padding-top: 20px;
+}
 
 @media (max-width: 1100px) {
   .generateGrid { grid-template-columns: 1fr; }
