@@ -31,7 +31,7 @@ const generatedContentSchema = new mongoose.Schema(
     },
     model: {
       type: String,
-      default: 'claude-sonnet-4-20250514',
+      default: 'llama3-70b-8192',
     },
     generationTimeMs: Number,
   },
