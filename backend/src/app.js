@@ -32,18 +32,22 @@ app.use(helmet({
 // ─── CORS ─────────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  'http://localhost:3000',
+  'https://listingai-7cyka666y-adab1204s-projects.vercel.app'
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS policy: origin ${origin} not allowed`));
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS policy: origin ${origin} not allowed`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.options('*', cors()); 
 
 // ─── Webhook route: raw body BEFORE json parser ─
 app.use(
