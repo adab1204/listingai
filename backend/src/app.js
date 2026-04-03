@@ -34,14 +34,27 @@ app.use(helmet({
 // ─── CORS ─────────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  'https://listingai-7cyka666y-adab1204s-projects.vercel.app'
+  /\.vercel\.app$/,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
       return callback(null, true);
     }
+
+    const isAllowed = allowedOrigins.some((allowed) => {
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+
+      return allowed === origin;
+    });
+
+    if (isAllowed) {
+      return callback(null, true);
+    }
+
     return callback(new Error(`CORS policy: origin ${origin} not allowed`));
   },
   credentials: true,
