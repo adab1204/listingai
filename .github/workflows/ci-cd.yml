@@ -96,7 +96,7 @@ jobs:
 
           npm install -g vercel
 
-          cd frontend
+          cd listingai/frontend
 
           vercel deploy --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
