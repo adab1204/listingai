@@ -168,8 +168,12 @@ jobs:
 
           export VERCEL_ORG_ID="$vercel_org_id"
           export VERCEL_PROJECT_ID="$vercel_project_id"
+          deploy_cwd="$GITHUB_WORKSPACE"
 
-          vercel deploy --cwd "$frontend_path" --prod \
+          echo "Deploy command will run from repo root: ${deploy_cwd#$GITHUB_WORKSPACE/}"
+          echo "Vercel project Root Directory should resolve the frontend app from there."
+
+          vercel deploy --cwd "$deploy_cwd" --prod \
             --token="$VERCEL_TOKEN" \
             --scope="$vercel_org_id" \
             --yes
