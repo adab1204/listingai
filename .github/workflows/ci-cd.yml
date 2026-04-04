@@ -170,7 +170,6 @@ jobs:
           export VERCEL_PROJECT_ID="$vercel_project_id"
 
           vercel deploy --cwd "$frontend_path" --prod \
-            --project "$vercel_project_id" \
             --token="$VERCEL_TOKEN" \
             --scope="$vercel_org_id" \
             --yes
