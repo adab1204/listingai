@@ -94,8 +94,11 @@ jobs:
              exit 0
           fi
 
-          npx vercel deploy --prod \
+          npm install -g vercel
+
+          cd frontend
+
+          vercel deploy --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --scope=${{ secrets.VERCEL_ORG_ID }} \
-            --confirm \
-            ./frontend
+            --yes
