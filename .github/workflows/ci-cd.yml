@@ -139,8 +139,7 @@ jobs:
             \( -path '*/node_modules' -o -path '*/dist' -o -path '*/build' \) -prune \
             -o -print | sed "s|$GITHUB_WORKSPACE|.|" | sort
 
-          vercel deploy "$frontend_path" --prod \
+          vercel deploy --cwd "$frontend_path" --prod \
             --token="$VERCEL_TOKEN" \
             --scope="$VERCEL_ORG_ID" \
-            --yes \
-            --no-git
+            --yes
