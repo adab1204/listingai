@@ -91,12 +91,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_ORG_ID_SECRET: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_SECRET: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" ]]; then
-            echo "ERROR: Missing VERCEL_TOKEN or VERCEL_ORG_ID"
+          if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+            echo "ERROR: Missing VERCEL_TOKEN"
             exit 1
           fi
 
@@ -139,7 +140,37 @@ jobs:
             \( -path '*/node_modules' -o -path '*/dist' -o -path '*/build' \) -prune \
             -o -print | sed "s|$GITHUB_WORKSPACE|.|" | sort
 
+          vercel_project_file="$frontend_path/.vercel/project.json"
+          vercel_org_id="${VERCEL_ORG_ID_SECRET:-}"
+          vercel_project_id="${VERCEL_PROJECT_ID_SECRET:-}"
+
+          if [[ -f "$vercel_project_file" ]]; then
+            echo "Found Vercel project link file: ${vercel_project_file#$GITHUB_WORKSPACE/}"
+            linked_org_id="$(node -pe "try { require(process.argv[1]).orgId || '' } catch (e) { '' }" "$vercel_project_file")"
+            linked_project_id="$(node -pe "try { require(process.argv[1]).projectId || '' } catch (e) { '' }" "$vercel_project_file")"
+
+            if [[ -z "$vercel_org_id" && -n "$linked_org_id" ]]; then
+              vercel_org_id="$linked_org_id"
+            fi
+
+            if [[ -z "$vercel_project_id" && -n "$linked_project_id" ]]; then
+              vercel_project_id="$linked_project_id"
+            fi
+          fi
+
+          if [[ -z "$vercel_org_id" || -z "$vercel_project_id" ]]; then
+            echo "ERROR: Missing Vercel project linkage. Provide VERCEL_ORG_ID and VERCEL_PROJECT_ID secrets or commit frontend/.vercel/project.json."
+            exit 1
+          fi
+
+          echo "Using Vercel org ID: $vercel_org_id"
+          echo "Using Vercel project ID: $vercel_project_id"
+
+          export VERCEL_ORG_ID="$vercel_org_id"
+          export VERCEL_PROJECT_ID="$vercel_project_id"
+
           vercel deploy --cwd "$frontend_path" --prod \
+            --project "$vercel_project_id" \
             --token="$VERCEL_TOKEN" \
-            --scope="$VERCEL_ORG_ID" \
+            --scope="$vercel_org_id" \
             --yes
