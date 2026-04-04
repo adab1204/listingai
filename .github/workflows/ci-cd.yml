@@ -87,18 +87,20 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
-      - name: Deploy frontend to Vercel
+      - name: Deploy Frontend (Vercel)
         run: |
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-             echo "❌ VERCEL_TOKEN not set, skipping deploy"
-             exit 0
+            echo "❌ Missing Vercel token, skipping..."
+            exit 0
           fi
 
           npm install -g vercel
 
-          cd listingai/frontend
+          echo "📁 Current directory:"
+          pwd
+          ls
 
-          vercel deploy --prod \
+          vercel deploy ./frontend --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --scope=${{ secrets.VERCEL_ORG_ID }} \
             --yes
