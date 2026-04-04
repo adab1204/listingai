@@ -88,11 +88,14 @@ jobs:
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
       - name: Deploy frontend to Vercel
-        if: "${{ secrets.VERCEL_TOKEN != '' }}"
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./frontend
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+             echo "❌ VERCEL_TOKEN not set, skipping deploy"
+             exit 0
+          fi
+
+          npx vercel deploy --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --confirm \
+            ./frontend
