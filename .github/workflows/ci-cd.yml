@@ -87,7 +87,7 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
-      - name: Deploy Frontend (Vercel)
+      - name: Deploy frontend to Vercel
         run: |
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
             echo "❌ Missing Vercel token, skipping..."
@@ -100,7 +100,7 @@ jobs:
           pwd
           ls
 
-          vercel deploy ./listingai/frontend --prod \
+          vercel deploy ./frontend --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --scope=${{ secrets.VERCEL_ORG_ID }} \
             --yes
