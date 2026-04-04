@@ -87,7 +87,7 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
-      - name: Deploy frontend to Vercel
+      - name: Deploy Frontend (Vercel)
         run: |
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
             echo "❌ Missing Vercel token, skipping..."
@@ -96,11 +96,29 @@ jobs:
 
           npm install -g vercel
 
-          echo "📁 Current directory:"
-          pwd
+          echo "📁 ROOT STRUCTURE:"
           ls
 
-          vercel deploy ./frontend --prod \
+          echo "📁 SEARCHING FOR FRONTEND..."
+
+          # 🔍 Auto-detect frontend directory
+          TARGET=""
+
+          if [ -d "frontend" ]; then
+            TARGET="frontend"
+          elif [ -d "client" ]; then
+            TARGET="client"
+          elif [ -d "listingai/frontend" ]; then
+            TARGET="listingai/frontend"
+          else
+            echo "❌ Could not find frontend directory"
+            exit 1
+          fi
+
+          echo "✅ Found frontend at: $TARGET"
+
+          vercel deploy ./$TARGET --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --scope=${{ secrets.VERCEL_ORG_ID }} \
-            --yes
+            --yes \
+            --no-git
