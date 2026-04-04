@@ -11,20 +11,19 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ─── Test ─────────────────────────────────
   test:
     name: Test Backend
     runs-on: ubuntu-latest
     services:
       mongo:
-        image: mongo:7.0    
+        image: mongo:7.0
         ports: ["27017:27017"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: cd backend && npm ci
       - name: Run tests
@@ -35,7 +34,6 @@ jobs:
           JWT_ACCESS_SECRET: test_access_secret_minimum_32_chars_long
           JWT_REFRESH_SECRET: test_refresh_secret_minimum_32_chars_long
 
-  # ─── Build & Push Docker images ───────────
   build:
     name: Build & Push
     runs-on: ubuntu-latest
@@ -76,7 +74,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─── Deploy to Render ─────────────────────
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -88,37 +85,60 @@ jobs:
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
       - name: Deploy Frontend (Vercel)
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "❌ Missing Vercel token, skipping..."
-            exit 0
-          fi
+          set -euo pipefail
 
-          npm install -g vercel
-
-          echo "📁 ROOT STRUCTURE:"
-          ls
-
-          echo "📁 SEARCHING FOR FRONTEND..."
-
-          # 🔍 Auto-detect frontend directory
-          TARGET=""
-
-          if [ -d "frontend" ]; then
-            TARGET="frontend"
-          elif [ -d "client" ]; then
-            TARGET="client"
-          elif [ -d "listingai/frontend" ]; then
-            TARGET="listingai/frontend"
-          else
-            echo "❌ Could not find frontend directory"
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" ]]; then
+            echo "ERROR: Missing VERCEL_TOKEN or VERCEL_ORG_ID"
             exit 1
           fi
 
-          echo "✅ Found frontend at: $TARGET"
+          echo "Current directory:"
+          pwd
 
-          vercel deploy ./$TARGET --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --scope=${{ secrets.VERCEL_ORG_ID }} \
+          echo "Top-level folder structure:"
+          find "$GITHUB_WORKSPACE" -maxdepth 3 \
+            \( -path '*/node_modules' -o -path '*/.git' -o -path '*/dist' -o -path '*/build' -o -path '*/coverage' \) -prune \
+            -o -print | sed "s|$GITHUB_WORKSPACE|.|" | sort
+
+          npm install -g vercel
+
+          echo "Detecting frontend directory..."
+
+          mapfile -t candidates < <(
+            find "$GITHUB_WORKSPACE" \
+              \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/coverage/*' \) -prune \
+              -o -type f -name 'package.json' -printf '%h\n' | sort -u
+          )
+
+          frontend_path=""
+          for dir in "${candidates[@]}"; do
+            if [[ -f "$dir/package.json" && -f "$dir/index.html" && -d "$dir/src" ]]; then
+              frontend_path="$dir"
+              break
+            fi
+          done
+
+          if [[ -z "$frontend_path" ]]; then
+            echo "ERROR: Could not find a frontend app directory containing package.json, index.html, and src/"
+            exit 1
+          fi
+
+          frontend_rel="${frontend_path#$GITHUB_WORKSPACE/}"
+
+          echo "Selected frontend path: $frontend_rel"
+          echo "Contents of selected frontend path:"
+          find "$frontend_path" -maxdepth 2 \
+            \( -path '*/node_modules' -o -path '*/dist' -o -path '*/build' \) -prune \
+            -o -print | sed "s|$GITHUB_WORKSPACE|.|" | sort
+
+          vercel deploy "$frontend_path" --prod \
+            --token="$VERCEL_TOKEN" \
+            --scope="$VERCEL_ORG_ID" \
             --yes \
             --no-git
